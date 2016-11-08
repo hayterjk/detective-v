@@ -67,18 +67,24 @@ class IssuesController < ApplicationController
     begin
       github = ApplicationHelper.github(current_user)
       if (github == nil)
-       redirect_to :back, notice: 'Error with Octokit api access_token.'
-      return
-    end
-    @issue = Issue.find(params[:id])
-    @publish_repo  = Repo.find(@issue.repo_id)
-    # check if access token
-    if current_user.access_token == "" or current_user.access_token.nil?
-      redirect_to :back, notice: 'Need valid GitHub Access Token in User Settings to Publish Issues' and return
-    else
-      user_github = Octokit::Client.new(:access_token => current_user.access_token)
-      @result = user_github.create_issue("#{@publish_repo.owner}/#{@publish_repo.name}", @issue.description, render_to_string("github_issue"))
-      redirect_to :back, notice: 'Issue Created' and return
+        redirect_to :back, notice: 'Error with Octokit api access_token.'
+        return
+      end
+    
+      @issue = Issue.find(params[:id])
+      @publish_repo  = Repo.find(@issue.repo_id)
+
+      # client = Octokit::Client.new(:client_id => ENV['GITHUB_KEY'], :client_secret => ENV['GITHUB_SECRET'])
+      # result = client.check_application_authorization('a035674a7dc9166b2cec6ceb6e17ae4533c9dcd3a')
+      # binding.pry
+
+      if current_user.access_token == "" or current_user.access_token.nil?
+        redirect_to :back, notice: 'Need valid GitHub Access Token in User Settings to Publish Issues' and return
+      else
+        user_github = Octokit::Client.new(:access_token => current_user.access_token)
+        @result = user_github.create_issue("#{@publish_repo.owner}/#{@publish_repo.name}", @issue.description, render_to_string("github_issue"))
+        redirect_to :back, notice: 'Issue Created' and return
+      end
     end
   end
 
